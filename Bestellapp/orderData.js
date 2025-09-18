@@ -54,7 +54,7 @@ let menuObjects = {
       likes: 22,
       liked: true,
     },
-
+ 
     {
       name: "Wakame Salad (pikant)",
       price: 5.8,

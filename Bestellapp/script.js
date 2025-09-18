@@ -45,6 +45,7 @@ function renderMenuCategoriesAndDishes(menu) {
   }
 }
 
+
 function renderTopDishes(menuArray) {
   const container = document.getElementById("content_top_dish");
   if (!container) return;

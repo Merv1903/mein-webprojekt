@@ -38,7 +38,7 @@ function getHeaderTemplate() {
 </section>
 
 `;
-}
+} 
 
 function getMenuSidebarTemplate() {
   return `
