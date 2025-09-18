@@ -37,14 +37,17 @@ function renderMenuCategoriesAndDishes(menu) {
     }
 
     if (showCategory) {
-      contentMenu.innerHTML += getMenuCategoryTemplate(currentCategory,categoryImg,"");
+      contentMenu.innerHTML += getMenuCategoryTemplate(
+        currentCategory,
+        categoryImg,
+        ""
+      );
       showCategory = false;
     }
 
     contentMenu.innerHTML += getMenuDishTemplate(dish);
   }
 }
-
 
 function renderTopDishes(menuArray) {
   const container = document.getElementById("content_top_dish");
@@ -101,6 +104,7 @@ function addProductToCart(name, price) {
   shoppingCart.push({ name, price, quantity: 1 });
   renderShoppingCart();
   updateCartButtonTotal();
+  toggleCartEmptyMessage(shoppingCart.length > 0);
 }
 
 function renderShoppingCart(targetId = "sidebar_shoppingcart_items") {
@@ -217,10 +221,14 @@ function decreaseQuantity(name) {
 
   renderShoppingCart();
   renderShoppingCart("sidebar_overlay_content");
+  updateCartButtonTotal();
+  toggleCartEmptyMessage(shoppingCart.length > 0);
 }
 
 function removeItem(name) {
   shoppingCart = shoppingCart.filter((item) => item.name !== name);
   renderShoppingCart();
   renderShoppingCart("sidebar_overlay_content");
+  updateCartButtonTotal();
+  toggleCartEmptyMessage(shoppingCart.length > 0);
 }
