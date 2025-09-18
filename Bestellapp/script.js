@@ -1,19 +1,26 @@
+let shoppingCart = [];
+
 function renderMainContent() {
   renderHeaderAndSidebar();
   renderMenuNavigation();
-  renderTopDishes(menuObjects.menu);
   renderMenuCategoriesAndDishes(menuObjects.menu);
-  renderShoppingCart();
+  initShoppingCartRendering();
+}
+
+function initShoppingCartRendering(targetId = "sidebar_shoppingcart_items") {
+  renderShoppingCart(targetId);
+  updateCartButtonTotal();
 }
 
 function renderHeaderAndSidebar() {
-  const container = document.getElementById("content_menu_and_sidebar");
-  container.innerHTML += getHeaderTemplate() + getMenuSidebarTemplate();
+  const contentContainer = document.getElementById("content_menu_and_sidebar");
+  contentContainer.innerHTML += getHeaderTemplate() + getMenuSidebarTemplate();
 }
 
 function renderMenuNavigation() {
-  const menu = document.getElementById("content_menu");
-  menu.innerHTML += getMenuNavigationTemplate();
+  const menuContainer = document.getElementById("content_menu");
+  const linksHTML = generateCategoryLinksHTML(menuObjects.categories);
+  menuContainer.innerHTML += getMenuNavigationTemplate(linksHTML);
 }
 
 function formatPrice(value) {
@@ -21,190 +28,122 @@ function formatPrice(value) {
 }
 
 function renderMenuCategoriesAndDishes(menu) {
-  const contentMenu = document.getElementById("content_menu");
+  const menuContainer = document.getElementById("content_menu");
   let lastCategory = null;
-  let showCategory = true;
-  let categoryImg = "";
 
   for (let i = 0; i < menu.length; i++) {
     const dish = menu[i];
     const currentCategory = dish.category;
 
     if (currentCategory !== lastCategory) {
-      showCategory = true;
       lastCategory = currentCategory;
-      categoryImg = menuObjects.categoryImages[currentCategory];
+      const categoryImage = menuObjects.categoryImages[currentCategory];
+      menuContainer.innerHTML += getMenuCategoryTemplate(currentCategory, categoryImage, "");
     }
 
-    if (showCategory) {
-      contentMenu.innerHTML += getMenuCategoryTemplate(
-        currentCategory,
-        categoryImg,
-        ""
-      );
-      showCategory = false;
-    }
-
-    contentMenu.innerHTML += getMenuDishTemplate(dish);
+    menuContainer.innerHTML += getMenuDishTemplate(dish);
   }
 }
 
-function renderTopDishes(menuArray) {
-  const container = document.getElementById("content_top_dish");
-  if (!container) return;
-
-  container.innerHTML = getTopDishesTemplate(menuArray);
+function increaseQuantity(name, price) {
+  addProductToCart(name, price);
 }
-
-function findTop3Dishes(menuArray) {
-  let top1 = null,
-    top2 = null,
-    top3 = null;
-
-  for (const dish of menuArray) {
-    if (!top1 || dish.likes > top1.likes) {
-      top3 = top2;
-      top2 = top1;
-      top1 = dish;
-    } else if (!top2 || dish.likes > top2.likes) {
-      top3 = top2;
-      top2 = dish;
-    } else if (!top3 || dish.likes > top3.likes) {
-      top3 = dish;
-    }
-  }
-
-  return [top1, top2, top3].filter(Boolean);
-}
-
-function getTopDishesTemplate(menuArray) {
-  const topDishes = findTop3Dishes(menuArray);
-
-  let topDishesHTML = '<div class="top_dishes_container">';
-  for (const dish of topDishes) {
-    topDishesHTML += showPopularDish(dish);
-  }
-  topDishesHTML += "</div>";
-
-  return topDishesHTML;
-}
-
-let shoppingCart = [];
 
 function addProductToCart(name, price) {
   for (let i = 0; i < shoppingCart.length; i++) {
     if (shoppingCart[i].name === name) {
       shoppingCart[i].quantity++;
-      renderShoppingCart();
-      updateCartButtonTotal();
+      resetCartView();
+      toggleCartEmptyMessage(true);
       return;
     }
   }
 
   shoppingCart.push({ name, price, quantity: 1 });
-  renderShoppingCart();
-  updateCartButtonTotal();
-  toggleCartEmptyMessage(shoppingCart.length > 0);
+  resetCartView();
+  toggleCartEmptyMessage(true);
 }
 
 function renderShoppingCart(targetId = "sidebar_shoppingcart_items") {
-  const container = document.getElementById(targetId);
-  if (!container) return;
+  const cartContainer = document.getElementById(targetId);
+  if (!cartContainer) return;
 
-  container.innerHTML = "";
-
+  cartContainer.innerHTML = "";
   let subtotal = 0;
-  let html = "";
+  const shipping = 5;
 
   for (let i = 0; i < shoppingCart.length; i++) {
     const item = shoppingCart[i];
     subtotal += item.price * item.quantity;
-    html += getShoppingCartTemplate(item);
+    cartContainer.innerHTML += getShoppingCartTemplate(item);
   }
 
-  container.innerHTML = html;
-
-  if (shoppingCart.length > 0) {
-    container.innerHTML += getShoppingCartSummaryTemplate(subtotal, 5.0);
+  if (shoppingCart.length) {
+    const total = subtotal + shipping;
+    cartContainer.innerHTML += getShoppingCartSummaryTemplate(subtotal, shipping, total);
   }
 
   toggleCartEmptyMessage(shoppingCart.length > 0);
 }
 
-function renderCartSummary(container, subtotal, shipping) {
-  container.innerHTML += getShoppingCartSummaryTemplate(subtotal, shipping);
-}
-
-function toggleCartEmptyMessage(hasItems) {
-  const captions1 = document.getElementsByClassName(
-    "sidebar_shoppingcart_caption"
-  );
-  const captions2 = document.getElementsByClassName("sidebar_overlay_caption");
-
-  for (let i = 0; i < captions1.length; i++) {
-    captions1[i].style.display = hasItems ? "none" : "flex";
-  }
-
-  for (let i = 0; i < captions2.length; i++) {
-    captions2[i].style.display = hasItems ? "none" : "flex";
-  }
-}
-
 function updateCartButtonTotal() {
   let total = 0;
-
   for (let i = 0; i < shoppingCart.length; i++) {
     total += shoppingCart[i].price * shoppingCart[i].quantity;
   }
-
-  const display = formatPrice(total);
-
-  const totalCosts = document.getElementById("cart_button_total");
-  if (totalCosts) {
-    totalCosts.innerText = `🛒 Warenkorb ${display}`;
-  }
+  const cartButton = document.getElementById("cart_button_total");
+  if (cartButton) cartButton.innerText = `🛒 Warenkorb ${formatPrice(total)}`;
 }
 
 function placeOrder() {
   shoppingCart = [];
-
-  const messageHtml = getOrderConfirmationTemplate();
-
-  const mainCart = document.getElementById("sidebar_shoppingcart_items");
+  const confirmationMessage = getOrderConfirmationTemplate();
+  const sidebarCart = document.getElementById("sidebar_shoppingcart_items");
   const overlayCart = document.getElementById("sidebar_overlay_content");
-
-  if (mainCart) mainCart.innerHTML = messageHtml;
-  if (overlayCart) overlayCart.innerHTML = messageHtml;
-
+  if (sidebarCart) sidebarCart.innerHTML = confirmationMessage;
+  if (overlayCart) overlayCart.innerHTML = confirmationMessage;
   updateCartButtonTotal();
+}
+
+function toggleCartEmptyMessage(hasItems) {
+  const sidebarCaptions = document.getElementsByClassName("sidebar_shoppingcart_caption");
+  const overlayCaptions = document.getElementsByClassName("sidebar_overlay_caption");
+
+  for (let i = 0; i < sidebarCaptions.length; i++) {
+    sidebarCaptions[i].style.display = hasItems ? "none" : "flex";
+  }
+
+  for (let i = 0; i < overlayCaptions.length; i++) {
+    overlayCaptions[i].style.display = hasItems ? "none" : "flex";
+  }
 }
 
 function resetCartView() {
-  renderShoppingCart();
+  initShoppingCartRendering();
   renderShoppingCart("sidebar_overlay_content");
-  updateCartButtonTotal();
+  renderShoppingCart(); 
 }
 
 function toggleSidebarOverlay() {
-  let overlay = document.getElementById("sidebar_overlay");
+  let overlayElement = document.getElementById("sidebar_overlay");
 
   if (window.innerWidth >= 850) {
-    if (overlay) {
-      overlay.style.display = "none";
-    }
+    if (overlayElement) overlayElement.style.display = "none";
+    document.body.classList.remove("overlay_no_scroll");
     return;
   }
 
-  if (!overlay) {
+  if (!overlayElement) {
     document.body.innerHTML += getSidebarOverlayTemplate();
-    overlay = document.getElementById("sidebar_overlay");
+    overlayElement = document.getElementById("sidebar_overlay");
   }
 
-  if (overlay.style.display === "none" || overlay.style.display === "") {
-    overlay.style.display = "flex";
+  const shouldShow = overlayElement.style.display === "none" || overlayElement.style.display === "";
+  overlayElement.style.display = shouldShow ? "flex" : "none";
+  document.body.classList.toggle("overlay_no_scroll", shouldShow);
+
+  if (shouldShow) {
     renderShoppingCart("sidebar_overlay_content");
-  } else {
-    overlay.style.display = "none";
   }
 }
 
@@ -212,23 +151,23 @@ function decreaseQuantity(name) {
   for (let i = 0; i < shoppingCart.length; i++) {
     if (shoppingCart[i].name === name) {
       shoppingCart[i].quantity--;
-      if (shoppingCart[i].quantity <= 0) {
-        shoppingCart.splice(i, 1);
-      }
+      if (shoppingCart[i].quantity <= 0) shoppingCart.splice(i, 1);
       break;
     }
   }
 
-  renderShoppingCart();
-  renderShoppingCart("sidebar_overlay_content");
-  updateCartButtonTotal();
+  resetCartView();
   toggleCartEmptyMessage(shoppingCart.length > 0);
 }
 
 function removeItem(name) {
-  shoppingCart = shoppingCart.filter((item) => item.name !== name);
-  renderShoppingCart();
-  renderShoppingCart("sidebar_overlay_content");
-  updateCartButtonTotal();
+  const updatedCart = [];
+  for (let i = 0; i < shoppingCart.length; i++) {
+    if (shoppingCart[i].name !== name) {
+      updatedCart.push(shoppingCart[i]);
+    }
+  }
+  shoppingCart = updatedCart;
+  resetCartView();
   toggleCartEmptyMessage(shoppingCart.length > 0);
 }

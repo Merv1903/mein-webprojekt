@@ -22,6 +22,10 @@ a {
   color: black;
 }
 
+body.overlay_no_scroll {
+  overflow: hidden;
+}
+
 .body_element {
   display: flex;
   flex-direction: column;
@@ -66,14 +70,13 @@ a {
 }
 
 /* CONTENT  */
-.content {
-  flex: 1;
-}
 
 .content_menu_and_sidebar {
   display: flex;
+  /* width: max-content; */
+  /* width: auto; */
+  /* max-width: 300px; */
   justify-content: space-between;
-  /* width: fit-content; */
 }
 
 @media (max-width: 850px) {
@@ -84,13 +87,26 @@ a {
 
 .content_menu_and_sidebar_background_color {
   background-color: #fcfcfc;
-  width: 100%;
+  /* width: 100vw; */
+  flex: 1;
+}
+
+@media (max-width: 860px) {
+  .content_menu_and_sidebar_background_color {
+    background-color: #fcfcfc;
+    width: auto;
+  }
 }
 
 .sidebar_shoppingcart {
   box-shadow: 0 1px 8px 0 rgb(0 0 0 / 15%);
   height: auto;
-  /* max-width: 30vw; */
+  /* width: 22vw; */
+  /* flex: 1; */
+  /* display: grid
+; */
+  display: flex;
+  justify-content: center;
 }
 
 @media (max-width: 850px) {
@@ -110,6 +126,13 @@ a {
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+
+.sidebar_shoppingcart_items {
+  /* max-height: 300px; */
+  overflow-y: auto;
+  padding-right: 5px;
+  width: 300px;
 }
 
 .sidebar_shoppingcart_caption {
@@ -398,13 +421,18 @@ p {
 .menu_category_dish_item {
   display: flex;
   justify-content: space-between;
-
   border-radius: 20px;
   padding: 10px;
-  position: relative;
+  /* position: relative; */
   margin-bottom: 8px;
   box-shadow: 0 4px 15px 0 rgb(29 18 37 / 14%);
-  width: clamp(223px, 40vw, 34vw);
+  /* width: clamp(223px, 40vw, 34vw); */
+}
+@media (max-width: 350px) {
+  .menu_category_dish_item {
+    justify-self: center;
+    width: 223px;
+  }
 }
 
 .menu_category_dish_item_image_and_button {
@@ -442,6 +470,12 @@ p {
   border: 2px solid rgba(104, 91, 81, 0.532);
   border-radius: 100px;
   cursor: pointer;
+}
+
+.menu_category_bottom_imprint {
+  display: flex;
+  flex-direction: column;
+  justify-self: center;
 }
 
 .menu_category_bottom_imprint_icon {

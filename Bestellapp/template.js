@@ -60,52 +60,25 @@ function getMenuSidebarTemplate() {
 `;
 }
 
-function getMenuNavigationTemplate() {
-  let linksHTML = "";
-
-  for (const key in menuObjects.categories) {
-    linksHTML += `<a href="#${key}"><h4>${menuObjects.categories[key]}</h4></a>`;
-  }
-
+function getMenuNavigationTemplate(linksHTML) {
   return `
     <section class="menu_navigation_section">
-      <div>
-        <div class="menu_navigation_item_search_bar">
-          <input type="text" class="search_input" placeholder="🔍 Suche nach Gerichten..." />
-        </div>
-      </div>
+  
       <div class="menu_navigation_category_slide">
-          <a href="#popular"><h4>Beliebt</h4></a>
         ${linksHTML}
-      </div>
-      <div class="menu_navigation_popular_dish_element">
-        <h2 class="menu_navigation_dish_header" id="popular">Beliebt</h2>
-        <div id="content_top_dish"></div>
       </div>
     </section>
   `;
 }
 
-function showPopularDish(dish) {
-  return `
-    <div class="popular_dish_element">
-      <img class="menu_navigation_popular_dish_element_image" src="${
-        dish.dish_img
-      }" />
-      <div class="popular_dish_caption">
-        <h4>${dish.name}</h4>
-        <p class="menu_navigation_dish_element_price">${formatPrice(
-          dish.price
-        )}</p>
-      </div>
-      <div>
-      <button class="menu_navigation_dish_element_button" onclick="addProductToCart('${
-        dish.name
-      }', ${dish.price})">+</button>
-      </div>
-    </div>
-  `;
+function generateCategoryLinksHTML(categories) {
+  let linksHTML = "";
+  for (const key in categories) {
+    linksHTML += `<a href="#${key}"><h4>${categories[key]}</h4></a>`;
+  }
+  return linksHTML;
 }
+
 
 function getMenuDishTemplate(dish) {
   return `
@@ -147,28 +120,25 @@ function getShoppingCartTemplate(item) {
         <span>${formatPrice(item.price * item.quantity)}</span>
       </div>
       <div class="cart-item-actions">
-        <button onclick="addProductToCart('${item.name}', ${
-    item.price
-  })">+</button>
-        <button onclick="decreaseQuantity('${item.name}')">–</button>
-        <button onclick="removeItem('${item.name}')">🗑</button>
+      <button onclick="increaseQuantity('${item.name}', ${item.price})">+</button>
+<button onclick="decreaseQuantity('${item.name}')">–</button>
+<button onclick="removeItem('${item.name}')">🗑</button>
       </div>
     </div>
   `;
 }
 
-function getShoppingCartSummaryTemplate(subtotal, shippingcosts) {
-  const totalcosts = subtotal + shippingcosts;
 
+function getShoppingCartSummaryTemplate(subtotal, shipping, total) {
   return `
     <div class="sidebar_cart_subtotal">
       <div>Zwischensumme:</div> ${formatPrice(subtotal)}
     </div>
     <div class="sidebar_cart_shipping">
-      <div>Versandkosten:</div> ${formatPrice(shippingcosts)}
+      <div>Versandkosten:</div> ${formatPrice(shipping)}
     </div>
     <div class="sidebar_cart_total">
-      <span>Gesamt:</span> ${formatPrice(totalcosts)}
+      <span>Gesamt:</span> ${formatPrice(total)}
     </div>
     <div class="order-button-wrapper">
       <button class="sidebar_cart_order_button" onclick="placeOrder()">Bestellen</button>
