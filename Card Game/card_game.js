@@ -13,32 +13,43 @@ const IMAGES = [
   "./img/image6.jpg",
 ];
 
-const flipImage = document.getElementById("box_inner");
-
-function renderImages() {
-  let contentRenderImages = document.getElementById("box");
-  contentRenderImages.innerHTML = "";
-  for (let index = 0; index < IMAGES.length; index++) {
-    contentRenderImages.innerHTML += getSmallImagesTemplate(index);
-  }
-}
-
-  const allBoxes = document.querySelectorAll(".box_layout");
-  allBoxes.forEach((box) => {
-    box.addEventListener("click", function () {
-      box.classList.toggle("box_flip_layout");
-    });
-  });
-
-
 function getSmallImagesTemplate(index) {
   return `
     <div class="box_layout">
-      <img class="image" src="${IMAGES[index]}" />
+      <div class="box_inner">
+        <div class="box_front">
+         ?
+        </div>
         <div class="box_back">
-    </div>
+          <img class="image" src="${IMAGES[index]}" />
+        </div>
+      </div>
     </div>`;
 }
+
+function renderImages() {
+  const contentRenderImages = document.getElementById("box");
+  contentRenderImages.innerHTML = "";
+
+  for (let i = 0; i < IMAGES.length; i++) {
+    contentRenderImages.innerHTML += getSmallImagesTemplate(i);
+  }
+
+  // Elemente müssen gerendert sein 
+  const flipCards = document.querySelectorAll(".box_inner");
+  flipCards.forEach((card) => {
+    card.addEventListener("click", function () {
+      card.classList.toggle("box_flip_layout");
+    });
+  });
+}
+
+// DOM muss mal laden 
+document.addEventListener("DOMContentLoaded", function () {
+  renderImages();
+});
+
+
 /*
 
 document.getElementById("box_inner").addEventListener("click", function flipImage() {
